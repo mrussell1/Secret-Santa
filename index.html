@@ -4,92 +4,312 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Secret Santa</title>
+
+<!-- =====================================================================
+     SECRET SANTA DRAW  -  QUICK GUIDE
+     ---------------------------------------------------------------------
+     Everything you are likely to edit is marked with "EDIT:" comments.
+       1. COLORS & LOOK .......... the <style> block just below
+       2. PEOPLE & RULES ......... "SETTINGS" at the top of the <script>
+       3. TEXT / LABELS .......... "TEXT" right under the settings
+     You can leave everything else alone.
+     After editing, re-upload this file to GitHub (named index.html).
+     ===================================================================== -->
+
 <style>
-:root{--bg:#fbf7f2;--fg:#2a2420;--card:#fff;--line:#e3d9cf;--accent:#b3202a;--muted:#7a6f66;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1816;--fg:#f3ece5;--card:#26211e;--line:#3a332e;--accent:#e5535c;--muted:#a59a91}}
-:root[data-theme="dark"]{--bg:#1c1816;--fg:#f3ece5;--card:#26211e;--line:#3a332e;--accent:#e5535c;--muted:#a59a91}
-html{color-scheme:light dark}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:Georgia,'Times New Roman',serif;line-height:1.5}
-main{max-width:560px;margin:0 auto;padding:24px 16px 48px}
-h1{font-size:1.8rem;margin:0 0 4px}
-p{color:var(--muted);margin:0 0 16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
-button{font:inherit;background:var(--accent);color:#fff;border:0;border-radius:8px;padding:10px 16px;cursor:pointer}
-button.alt{background:transparent;color:var(--accent);border:1px solid var(--accent);padding:6px 12px}
-input{font:inherit;width:100%;box-sizing:border-box;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
+/* ---------- EDIT: COLORS ----------
+   Change these hex codes to restyle the whole page.
+   The first block is light mode, the second is dark mode (used automatically
+   when a phone/computer is set to dark). */
+:root{
+  --bg:#fbf4ea;        /* page background (warm cream)          */
+  --bg2:#f3e3d0;       /* bottom of the background gradient     */
+  --fg:#2b2220;        /* main text color                       */
+  --card:#fffdf9;      /* card background                       */
+  --line:#e6d3bd;      /* card border color                     */
+  --red:#b3202a;       /* Christmas red: buttons, headings      */
+  --green:#1f6b45;     /* Christmas green: header strip, accents*/
+  --gold:#c9972b;      /* gold: small decorations               */
+  --muted:#7a6a60;     /* secondary text                        */
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#1b1715; --bg2:#14211a; --fg:#f4ece4; --card:#262120; --line:#3d3430;
+    --red:#e5535c; --green:#4fb283; --gold:#e0b04a; --muted:#a89c93;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1b1715; --bg2:#14211a; --fg:#f4ece4; --card:#262120; --line:#3d3430;
+  --red:#e5535c; --green:#4fb283; --gold:#e0b04a; --muted:#a89c93;
+}
+
+html{color-scheme:light dark;min-height:100%}
+body{
+  margin:0;color:var(--fg);
+  /* EDIT: fonts - first one found on the device is used */
+  font-family:Georgia,'Times New Roman',serif;line-height:1.5;
+  background:linear-gradient(var(--bg),var(--bg2)) fixed;
+  min-height:100vh;
+}
+/* Candy-cane strip across the top. EDIT: change the colors or height (10px). */
+body::before{
+  content:"";display:block;height:10px;
+  background:repeating-linear-gradient(45deg,var(--red) 0 12px,#fff 12px 24px);
+}
+main{max-width:560px;margin:0 auto;padding:24px 16px 56px;position:relative;z-index:1}
+h1{font-size:2rem;margin:0 0 4px;color:var(--red);text-align:center}
+.sub{color:var(--muted);text-align:center;margin:0 0 20px}
+.round{
+  display:inline-block;background:var(--green);color:#fff;border-radius:999px;
+  padding:2px 14px;font-size:.95rem;margin-bottom:8px;
+}
+.center{text-align:center}
+.card{
+  background:var(--card);border:1px solid var(--line);border-top:4px solid var(--green);
+  border-radius:12px;padding:16px;margin-bottom:14px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+button{
+  font:inherit;background:var(--red);color:#fff;border:0;border-radius:8px;
+  padding:10px 18px;cursor:pointer;
+}
+button:hover{filter:brightness(1.1)}
+button.alt{background:transparent;color:var(--green);border:1px solid var(--green);padding:6px 12px}
+input{
+  font:inherit;width:100%;box-sizing:border-box;padding:8px;
+  border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);
+}
 .row{margin-bottom:12px}
 .row b{display:block;margin-bottom:4px}
 .pair{display:flex;gap:8px}
-.big{font-size:2rem;color:var(--accent);margin:12px 0}
+.big{font-size:2.2rem;color:var(--red);margin:14px 0;text-align:center}
+.note{font-size:.9rem;color:var(--muted)}
+.warn{color:var(--red)}
+
+/* Falling snow. EDIT: remove this whole block (and the snow code in the
+   script) if you don't want snow. */
+.flake{
+  position:fixed;top:-20px;color:var(--gold);opacity:.7;pointer-events:none;
+  z-index:0;animation:fall linear infinite;
+}
+@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.flake{display:none}}
 </style>
 </head>
 <body>
 <main id="app"></main>
+
 <script>
-var people=["Michael","Madison","Kevin","Stacy","Christina","Bailey"];
-var partner={Michael:"Madison",Madison:"Michael",Kevin:"Stacy",Stacy:"Kevin",Christina:"Bailey",Bailey:"Christina"};
-var KEY=90;
-function enc(s){var b=new TextEncoder().encode(s),o="";for(var i=0;i<b.length;i++){o+=("0"+(b[i]^KEY).toString(16)).slice(-2);}return o;}
-function dec(h){var a=[];for(var i=0;i<h.length;i+=2){a.push(parseInt(h.substr(i,2),16)^KEY);}return new TextDecoder().decode(new Uint8Array(a));}
-function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
-function draw(){
-  while(true){
-    var r=shuffle(people),ok=true;
-    for(var i=0;i<people.length;i++){if(r[i]===people[i]||r[i]===partner[people[i]]){ok=false;break;}}
-    if(ok){return r;}
-  }
+/* =====================================================================
+   SETTINGS  (EDIT: this is where you change people and rules)
+   ===================================================================== */
+
+/* EDIT: PEOPLE
+   Everyone in the draw. To add someone, add a new name in quotes with a
+   comma. To remove someone, delete their name AND any rule that uses it.
+   Names must match the rules below exactly (spelling and capital letters). */
+var PEOPLE = ["Michael","Madison","Kevin","Stacy","Christina","Bailey"];
+
+/* EDIT: RULES
+   Each line is a pair who CANNOT draw each other (works both ways).
+   Add a line for another couple, delete a line to remove a rule.
+   Every name here must also be in PEOPLE above.
+   Nobody can ever draw themselves; that is automatic. */
+var RULES = [
+  ["Michael","Madison"],
+  ["Kevin","Stacy"],
+  ["Christina","Bailey"]
+];
+
+/* EDIT: DEFAULT ROUND LABEL
+   Pre-filled in the "Round label" box. Shown on every person's reveal
+   screen so it's clear which draw a link belongs to. You can also change
+   it on the page itself before each draw. */
+var DEFAULT_ROUND = "2026";
+
+/* EDIT: SECRET NUMBER (advanced)
+   Used to scramble the links. Any number from 1 to 255.
+   WARNING: changing it makes all previously sent links stop working. */
+var KEY = 90;
+
+/* =====================================================================
+   TEXT  (EDIT: change any wording shown on the page)
+   ===================================================================== */
+var TEXT = {
+  title:        "🎄 Secret Santa 🎅",
+  organizerSub: "Draws names with the couple rules applied. You’ll only see links, not who drew whom.",
+  labelPrompt:  "Round label (shown on everyone’s reveal screen)",
+  drawButton:   "Draw names",
+  redrawButton: "Draw again",
+  redrawWarn:   "Drawing again makes a brand-new draw. Every link you already sent will be out of date, so send everyone new links.",
+  linksIntro:   "Send each person only their own link, privately.",
+  copy:         "Copy",
+  revealHello:  "Ho ho ho, ",
+  revealIntro:  "Ready to see who you’re buying for? Make sure nobody is looking over your shoulder.",
+  revealButton: "🎁 Reveal my match",
+  revealAfter:  "Shh, keep it secret!",
+  newestNote:   "Using an older link? Check that the round label above matches the newest one you were sent.",
+  badLink:      "This link doesn’t look right. Ask the organizer for a new one.",
+  noDraw:       "Couldn’t find a valid draw with these rules. Check PEOPLE and RULES at the top of the script."
+};
+
+/* =====================================================================
+   CODE  (you shouldn't need to edit below this line)
+   ===================================================================== */
+
+/* Turn the RULES pairs into a quick lookup: blocked["Kevin|Stacy"] = true */
+var blocked = {};
+RULES.forEach(function(p){ blocked[p[0]+"|"+p[1]] = true; blocked[p[1]+"|"+p[0]] = true; });
+
+/* Scramble text -> hex, and back. (Obfuscation, not real encryption.) */
+function enc(s){
+  var b = new TextEncoder().encode(s), o = "";
+  for (var i = 0; i < b.length; i++){ o += ("0" + (b[i] ^ KEY).toString(16)).slice(-2); }
+  return o;
 }
-var app=document.getElementById("app");
-var tokens=null;
+function dec(h){
+  var a = [];
+  for (var i = 0; i < h.length; i += 2){ a.push(parseInt(h.substr(i,2),16) ^ KEY); }
+  return new TextDecoder().decode(new Uint8Array(a));
+}
+
+/* Make HTML-safe text (the label is typed by a person). */
+function esc(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+
+function shuffle(a){
+  a = a.slice();
+  for (var i = a.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+/* Shuffle until nobody has themselves or a blocked partner.
+   Gives up after 20000 tries (means the rules make a draw impossible). */
+function draw(){
+  for (var n = 0; n < 20000; n++){
+    var r = shuffle(PEOPLE), ok = true;
+    for (var i = 0; i < PEOPLE.length; i++){
+      if (r[i] === PEOPLE[i] || blocked[PEOPLE[i] + "|" + r[i]]){ ok = false; break; }
+    }
+    if (ok){ return r; }
+  }
+  return null;
+}
+
+var app = document.getElementById("app");
+var tokens = null;          /* the current draw's scrambled results */
+var drawnLabel = "";        /* label used for the current draw */
+var labelValue = DEFAULT_ROUND;
+
+/* Decide which screen to show: a person's reveal link, or the organizer page. */
 function view(){
-  var h=location.hash.slice(1);
-  if(/^[0-9a-f]+$/.test(h)&&h.length%2===0){return reveal(h);}
+  var h = location.hash.slice(1);
+  if (/^[0-9a-f]+$/.test(h) && h.length % 2 === 0){ return reveal(h); }
   return organizer();
 }
+
+/* ---------- Screen a person sees when they open their link ---------- */
 function reveal(h){
-  var giver="",recv="";
-  try{var p=dec(h).split("|");giver=p[0];recv=p[1];}catch(e){}
-  if(!giver||!recv){app.innerHTML="<h1>Hmm…</h1><p>This link doesn’t look right. Ask the organizer for a new one.</p>";return;}
-  app.innerHTML="<h1>Secret Santa</h1><div class='card'><p>Hi "+giver+"! Ready to see who you’re buying for? Make sure nobody is looking over your shoulder.</p><button id='go'>Reveal my match</button><div id='out'></div></div>";
-  document.getElementById("go").onclick=function(){
-    document.getElementById("out").innerHTML="<div class='big'>"+recv+"</div><p>Keep it secret!</p>";
-    this.style.display="none";
+  var giver = "", recv = "", label = "";
+  try { var p = dec(h).split("|"); giver = p[0]; recv = p[1]; label = p[2] || ""; } catch(e){}
+  if (!giver || !recv){
+    app.innerHTML = "<h1>🎄</h1><p class='sub'>" + TEXT.badLink + "</p>";
+    return;
+  }
+  app.innerHTML =
+    "<h1>" + TEXT.title + "</h1>" +
+    "<div class='center'>" + (label ? "<span class='round'>" + esc(label) + "</span>" : "") + "</div>" +
+    "<div class='card center'><p>" + TEXT.revealHello + esc(giver) + "! " + TEXT.revealIntro + "</p>" +
+    "<button id='go'>" + TEXT.revealButton + "</button><div id='out'></div></div>" +
+    "<p class='note center'>" + TEXT.newestNote + "</p>";
+  document.getElementById("go").onclick = function(){
+    document.getElementById("out").innerHTML =
+      "<div class='big'>" + esc(recv) + "</div><p class='note'>" + TEXT.revealAfter + "</p>";
+    this.style.display = "none";
   };
 }
+
+/* ---------- Organizer screen (draw + links) ---------- */
 function organizer(){
-  var base="";
-  try{base=location.href.split("#")[0];}catch(e){}
-  var html="<h1>Secret Santa</h1><p>Draws names with the couple rules applied. You’ll only see links, not who drew whom.</p>";
-  html+="<div class='card'><button id='draw'>"+(tokens?"Draw again":"Draw names")+"</button></div>";
-  if(tokens){
-    html+="<div class='card'><div class='row'><b>Shared page link</b><input id='base' value='"+base+"'></div><p>Make sure this is the page’s shared link, then send each person their own link below.</p><div id='links'></div></div>";
+  var base = "";
+  try { base = location.href.split("#")[0]; } catch(e){}
+
+  var html = "<h1>" + TEXT.title + "</h1><p class='sub'>" + TEXT.organizerSub + "</p>" +
+    "<div class='card'><div class='row'><b>" + TEXT.labelPrompt + "</b>" +
+    "<input id='label' maxlength='40' value='" + esc(labelValue) + "'></div>" +
+    "<button id='draw'>" + (tokens ? TEXT.redrawButton : TEXT.drawButton) + "</button>" +
+    (tokens ? "<p class='note warn'>" + TEXT.redrawWarn + "</p>" : "") + "</div>";
+
+  if (tokens){
+    html += "<div class='card'><div class='center'><span class='round'>" + esc(drawnLabel || "(no label)") + "</span></div>" +
+      "<div class='row'><b>Shared page link</b><input id='base' value='" + esc(base) + "'></div>" +
+      "<p class='note'>" + TEXT.linksIntro + "</p><div id='links'></div></div>";
   }
-  app.innerHTML=html;
-  document.getElementById("draw").onclick=function(){
-    var r=draw();tokens={};
-    for(var i=0;i<people.length;i++){tokens[people[i]]=enc(people[i]+"|"+r[i]);}
+  app.innerHTML = html;
+
+  document.getElementById("label").oninput = function(){ labelValue = this.value; };
+
+  document.getElementById("draw").onclick = function(){
+    var r = draw();
+    if (!r){ alert(TEXT.noDraw); return; }
+    /* Remove the "|" character so a label can't break the link format. */
+    drawnLabel = labelValue.replace(/\|/g, "").trim();
+    tokens = {};
+    for (var i = 0; i < PEOPLE.length; i++){
+      tokens[PEOPLE[i]] = enc(PEOPLE[i] + "|" + r[i] + "|" + drawnLabel);
+    }
     organizer();
   };
-  if(tokens){
-    var baseEl=document.getElementById("base");
-    var render=function(){
-      var out="";
-      people.forEach(function(n){
-        var url=baseEl.value.split("#")[0]+"#"+tokens[n];
-        out+="<div class='row'><b>"+n+"</b><div class='pair'><input readonly value='"+url+"'><button class='alt' data-u='"+url+"'>Copy</button></div></div>";
+
+  if (tokens){
+    var baseEl = document.getElementById("base");
+    var render = function(){
+      var out = "";
+      PEOPLE.forEach(function(n){
+        var url = baseEl.value.split("#")[0] + "#" + tokens[n];
+        out += "<div class='row'><b>" + esc(n) + "</b><div class='pair'>" +
+               "<input readonly value='" + esc(url) + "'>" +
+               "<button class='alt' data-u='" + esc(url) + "'>" + TEXT.copy + "</button></div></div>";
       });
-      var box=document.getElementById("links");box.innerHTML=out;
-      var bs=box.querySelectorAll("button");
-      for(var i=0;i<bs.length;i++){bs[i].onclick=function(){
-        var u=this.getAttribute("data-u"),b=this;
-        try{navigator.clipboard.writeText(u).then(function(){b.textContent="Copied";});}catch(e){b.textContent="Select & copy";}
-      };}
+      var box = document.getElementById("links");
+      box.innerHTML = out;
+      var bs = box.querySelectorAll("button");
+      for (var i = 0; i < bs.length; i++){
+        bs[i].onclick = function(){
+          var u = this.getAttribute("data-u"), b = this;
+          try { navigator.clipboard.writeText(u).then(function(){ b.textContent = "Copied ✓"; }); }
+          catch(e){ b.textContent = "Select & copy"; }
+        };
+      }
     };
-    baseEl.oninput=render;render();
+    baseEl.oninput = render;
+    render();
   }
 }
-window.addEventListener("hashchange",view);
+
+/* ---------- Falling snow (EDIT: change 26 for more/fewer flakes) ---------- */
+(function(){
+  for (var i = 0; i < 26; i++){
+    var f = document.createElement("div");
+    f.className = "flake";
+    f.textContent = "❄";
+    f.style.left = Math.random() * 100 + "vw";
+    f.style.fontSize = (10 + Math.random() * 16) + "px";
+    f.style.animationDuration = (9 + Math.random() * 12) + "s";
+    f.style.animationDelay = (-Math.random() * 20) + "s";
+    document.body.appendChild(f);
+  }
+})();
+
+window.addEventListener("hashchange", view);
 view();
 </script>
 </body>
